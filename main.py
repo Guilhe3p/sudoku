@@ -15,10 +15,11 @@ def verify_sub_matrix(matrix):  #toma una matriz y se fija si hay elementos repe
 class Game():
     def __init__(self):
         self.matrix = np.zeros((9,9), np.uint8) #array de 0s con tipo de dato int 8 bits (0-255)
+        self.__inmmutables = []
         self.state = True
 
     def __str__(self) -> str:
-        return str(self.matrix)
+        return (str(self.matrix)+"\n"+str(self.state))
 
     def load_ordered(self):
         self.matrix = np.arange(81).reshape(9,9)
@@ -38,21 +39,21 @@ class Game():
         
         self.immutables = self.matrix.nonzero()
     def load_random_from_file(self,file_name):
-        file = open(file_name,"r")
-        lines = file.readlines() 
-        line = lines[np.random.randint(0,len(lines))]
-        mat = []
+        file = open(file_name,"r")  #abro archivo en modo lectura
+        lines = file.readlines() #cargo una lista con sus renglones
+        line = lines[np.random.randint(0,len(lines))]   #elijo un reglón al azar
+        mat = []    #creo una lista a cargar con los valores del renglón
         
-        for i in line:
+        for i in line:  #leo cada caracter y lo agrego a "mat" según corresponda
             if i == ".":
                 mat.append(0)
             elif "0" <= i <= "9":
                 mat.append(int(i))
 
-        self.matrix = np.array(mat).reshape(9,9)
+        self.matrix = np.array(mat).reshape(9,9)    #le doy forma de matriz a mat
+        self.__inmmutables = np.nonzero(self.matrix)    #inmmutables tendrá las posiciones con los numeros cargados y no podrá
 
-
-    def verify_game(self):
+    def __verify_game(self):
         for c in range(9):
             if not(verify_list(self.matrix[c])):
                 self.state = False
@@ -72,31 +73,29 @@ class Game():
         self.state = True        
         return True
 
-    def delete(self,x,y):
-         self.matrix[x][y] = 0
-
     def __invalid_position(self,x,y):
-        for i in range(len(self.immutables[0])):
-            if (x,y) == (self.immutables[0][i],self.immutables[1][i]):
+        for i in range(len(self.__inmmutables[0])): #reviso si el par (x,y) existe en en __inmmutables
+            if (x,y) == (self.__inmmutables[0][i],self.__inmmutables[1][i]):
                 return True
         return False
     
     def play(self,x,y,value):
-        if not(self.invalid_position(x,y)):
-            self.matrix[x][y] = value
-            return "JUGADA VALIDA"
-        
-        return "JUGADA INVALIDA"
+        if self.__invalid_position(x,y):
+            return "JUGADA INVALIDA"
+    
+        self.matrix[x][y] = value
+        self.__verify_game()
+        return "JUGADA VALIDA"
 
     def is_finished(self):
-        return np.count_nonzero(self.matrix) == 0 and self.state
+        return np.count_nonzero(self.matrix) == 81 and self.state
     
 juego = Game()
 
 facil = 45
 dificil = 17
 
-'''juego.load_random(facil)
+juego.load_random_from_file("puzzles0_kaggle")
 print(juego)
 while not(juego.is_finished()):
     x = int(input("x:"))
@@ -105,10 +104,18 @@ while not(juego.is_finished()):
 
     print(juego.play(x,y,v))
     print(juego)
-    print(juego.sta)'''
 
-juego.load_random_from_file("puzzles0_kaggle")
-print(juego)
+#  [5, 9, 6, 2, 8, 7, 1, 3, 4],
+#  [8, 3, 1, 4, 5, 9, 6, 2, 7],
+#  [2, 7, 4, 6, 3, 1, 9, 5, 8],
+#  [6, 1, 5, 9, 7, 4, 3, 8, 2],
+#  [7, 2, 3, 8, 1, 6, 5, 4, 9],
+#  [4, 8, 9, 3, 2, 5, 7, 6, 1],
+#  [3, 6, 7, 1, 4, 8, 2, 9, 5],
+#  [9, 5, 8, 7, 6, 2, 4, 1, 3],
+#  [1, 4, 2, 5, 9, 3, 8, 7, 6]
+
+
 
 
 
