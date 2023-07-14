@@ -75,7 +75,7 @@ class Game():
     def delete(self,x,y):
          self.matrix[x][y] = 0
 
-    def invalid_position(self,x,y):
+    def __invalid_position(self,x,y):
         for i in range(len(self.immutables[0])):
             if (x,y) == (self.immutables[0][i],self.immutables[1][i]):
                 return True
