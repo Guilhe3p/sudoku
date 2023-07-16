@@ -1,38 +1,40 @@
-import customtkinter as ctk
-from time import strftime, time
+from customtkinter import CTk,set_appearance_mode,set_default_color_theme,CTkFrame,CTkLabel,CTkButton
+from time import time
 from tkinter import StringVar
-import main as lg
+import game_logic as lg
 
-class App(ctk.CTk):
+class App(CTk):
     def __init__(self):
         super().__init__()
         #establezco nuestra partida lógica
         self.match = lg.Game()
 
         #aparciencia general de la GUI
-        ctk.set_appearance_mode("System")
-        ctk.set_default_color_theme("blue")
+        set_appearance_mode("System")
+        set_default_color_theme("blue")
 
         #ventana principal
+        self.resizable(False,False)
         self.title("Sudoku")
 
         #contenedor de modulos de la ventana
-        self.frame = ctk.CTkFrame(master=self, fg_color="white")
+        self.frame = CTkFrame(master=self, fg_color="white")
         self.frame.pack(pady=10,padx=10,fill="both",expand=True)
 
         #reloj
-        self.cronometro = ctk.CTkLabel(master=self.frame, text="00:00:00", width=100, height=30,corner_radius=0, fg_color="white")
+        self.cronometro = CTkLabel(master=self.frame, text="00:00:00", width=100, height=30,corner_radius=0, fg_color="white")
         self.cronometro.pack(padx=10)
 
         #modulo tabla
-        table = ctk.CTkFrame(master=self.frame, width=400, height=400,corner_radius=0, fg_color="black", border_color="black", border_width=20)
+        table = CTkFrame(master=self.frame, width=400, height=400,corner_radius=0, fg_color="black", border_color="black", border_width=20)
         table.pack(padx=10)
 
+        #tabla con los objetos botones y sus StringVar asociadas
         self.botones = [[None for i in range(9)] for i in range(9)]
         self.valores = [[None for i in range(9)] for i in range(9)]
         #modulos macro-celdas
         for i in range(9):
-            macro_cell = ctk.CTkFrame(master=table,
+            macro_cell = CTkFrame(master=table,
                                       fg_color="blue",
                                       width=120,
                                       height=120,
@@ -50,7 +52,7 @@ class App(ctk.CTk):
                 self.valores[x][y] = StringVar()    #creo una StringVar de Tkinter para no tener que cambiar el valor de cada boton manualmente 
                 self.valores[x][y].set("0") #agrupo todas las StringVar en la matriz valores
 
-                cell_button = ctk.CTkButton(master=macro_cell,
+                cell_button = CTkButton(master=macro_cell,
                                        textvariable=self.valores[x][y],   #cada botón tendrá una posición de memoria con su StringVar correspondiente 
                                        text_color="black",
                                        width=40,
@@ -68,13 +70,12 @@ class App(ctk.CTk):
 
                 self.selectedCell = (0,0) #establezco a la posicion 0,0 como la seleccionada para evitar errores
 
-
         #creo la botonera
-        self.keypad = ctk.CTkFrame(master=self.frame)
+        self.keypad = CTkFrame(master=self.frame)
         self.keypad.pack(pady=10)
 
         for i in range(9):
-            input_button = ctk.CTkButton(
+            input_button = CTkButton(
                 master=self.keypad,
                 text=str(i+1),
                 font=("Arial",16),
@@ -86,7 +87,7 @@ class App(ctk.CTk):
                 corner_radius=0)
 
             input_button.grid(row=(i//3),column=(i % 3),padx=1,pady=1)
-        input_button = ctk.CTkButton(master=self.keypad,text="",width=40,height=40,border_color="black",command = lambda: self.__input("0"),border_width=2,corner_radius=0)
+        input_button = CTkButton(master=self.keypad,text="",width=40,height=40,border_color="black",command = lambda: self.__input("0"),border_width=2,corner_radius=0)
         input_button.grid(row=3,column=1,padx=1,pady=1)
 
     def load_game(self):
@@ -145,9 +146,5 @@ class App(ctk.CTk):
         
         self.after(1000,self.crono_update)
 
-graficos = App()
-graficos.load_game()
 
-graficos.crono_update()
-graficos.mainloop()
 
