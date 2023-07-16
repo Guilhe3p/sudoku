@@ -81,29 +81,29 @@ class Game():
     
     def play(self,x,y,value) -> str:    #temporal return str
         if self.__invalid_position(x,y):
-            return "JUGADA INVALIDA"
+            return False
     
         self.matrix[x][y] = value
         self.__verify_game()
-        return "JUGADA VALIDA"
+        return True
 
     def is_finished(self) -> bool:
         return np.count_nonzero(self.matrix) == 81 and self.state
     
-juego = Game()
+# juego = Game()
 
-facil = 45
-dificil = 17
+# facil = 45
+# dificil = 17
 
-juego.load_random_from_file("puzzles0_kaggle")
-print(juego)
-while not(juego.is_finished()):
-    x = int(input("x:"))
-    y = int(input("y:"))
-    v = int(input("val:"))
+# juego.load_random_from_file("puzzles0_kaggle")
+# print(juego)
+# while not(juego.is_finished()):
+#     x = int(input("x:"))
+#     y = int(input("y:"))
+#     v = int(input("val:"))
 
-    print(juego.play(x,y,v))
-    print(juego)
+#     print(juego.play(x,y,v))
+#     print(juego)
 
 #  [5, 9, 6, 2, 8, 7, 1, 3, 4],
 #  [8, 3, 1, 4, 5, 9, 6, 2, 7],
