@@ -1,5 +1,4 @@
 import app
-import game_logic
 
 if __name__ == "__main__":
     application = app.App()
