@@ -21,6 +21,9 @@ class Game():
     def __str__(self) -> str:
         return (str(self.matrix)+"\n"+str(self.state))
 
+    def get_inmmutables(self) -> array:
+        return self.__inmmutables
+
     def load_special_1(self) -> None:
         self.matrix = array([[i%9 for i in range(j,9+j)] for j in range(9)])
     def load_random(self,magnitude) -> None:
@@ -49,7 +52,14 @@ class Game():
                 mat.append(int(i))
 
         self.matrix = array(mat).reshape(9,9)    #le doy forma de matriz a mat
-        self.__inmmutables = nonzero(self.matrix)    #inmmutables tendrá las posiciones con los numeros cargados y no podrá
+        self.__inmmutables = nonzero(self.matrix)    #inmmutables tendrá las posiciones con los numeros cargados y que no podrán ser modificados
+    def load_given(self,data:str)->bool:    #carga una partida dado un string con datos
+        mat = []
+        for i in data:
+            mat.append(int(i))
+
+        self.matrix = array(mat).reshape(9,9) 
+        self.__inmmutables = nonzero(self.matrix)   
 
     def __verify_game(self) -> bool:
         for c in range(9):

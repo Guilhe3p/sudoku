@@ -93,15 +93,34 @@ class App(CTk):
     def load_game(self):
         self.start_time = time()
         self.match.load_random_from_file("puzzles0_kaggle")
+        game_data_file = open("game_data","w")
         
         for i in range(9):
             for j in range(9):
+                self.match.matrix[j][i]
                 if self.match.matrix[j][i] == 0:
                     self.modify_cell_value(i,j,"")
                 else:
                     self.modify_cell_value(i,j,self.match.matrix[j][i])
+                    self.botones[i][j].configure(text_color="gray")
+
+                game_data_file.write(str(self.match.matrix[i][j]))
+
+        game_data_file.write("\n000000000000000000000000000000000000000000000000000000000000000000000000000000000\n0")
+
+        game_data_file.close()
 
         print(self.match)
+
+    def save_game(self):
+        game_data_file = open("game_data","r+")
+        game_data_file.seek(82)
+        
+        for i in range(9):
+            for j in range(9):
+                game_data_file.write(str(self.match.matrix[i][j]))
+
+        game_data_file.close()
 
     def modify_cell_value(self,x,y,value) -> None:
         self.valores[x][y].set(value)
@@ -125,24 +144,30 @@ class App(CTk):
                 self.valores[self.selectedCell[0]][self.selectedCell[1]].set("")
             else:
                 self.valores[self.selectedCell[0]][self.selectedCell[1]].set(number)
+            
+            self.save_game()
 
-    def crono_update(self):
-        self.match_time = time()-self.start_time
-        hours = str(int(self.match_time // 3600))
+    def crono_update(self) -> None:
+        self.match_time = int(time()-self.start_time)
+        hours = str(self.match_time // 3600)
         if len(hours)==1:
             hours = "0"+hours
 
-        minutes = str(int((self.match_time // 60)%60))
+        minutes = str((self.match_time // 60)%60)
         if len(minutes)==1:
             minutes = "0"+minutes
 
-        seconds = str(int(self.match_time%60))
+        seconds = str(self.match_time%60)
         if len(seconds)==1:
             seconds = "0"+seconds
 
         tiempo = f'{hours}:{minutes}:{seconds}'
 
         self.cronometro.configure(text=tiempo)
+
+        with open("game_data","r+") as game_data_file:
+            game_data_file.seek(164)
+            game_data_file.write(str(self.match_time))
         
         self.after(1000,self.crono_update)
 
