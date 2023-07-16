@@ -1,6 +1,7 @@
 import customtkinter as ctk
-import main as lg
+from time import strftime, time
 from tkinter import StringVar
+import main as lg
 
 class App(ctk.CTk):
     def __init__(self):
@@ -10,19 +11,21 @@ class App(ctk.CTk):
 
         #aparciencia general de la GUI
         ctk.set_appearance_mode("System")
-        ctk.set_default_color_theme("green")
-        #ventana principal
+        ctk.set_default_color_theme("blue")
 
-        #self.geometry("500x600")
+        #ventana principal
         self.title("Sudoku")
+
         #contenedor de modulos de la ventana
         self.frame = ctk.CTkFrame(master=self, fg_color="white")
         self.frame.pack(pady=10,padx=10,fill="both",expand=True)
 
+        #reloj
+        self.cronometro = ctk.CTkLabel(master=self.frame, text="00:00:00", width=100, height=30,corner_radius=0, fg_color="white")
+        self.cronometro.pack(padx=10)
+
         #modulo tabla
-        table = ctk.CTkFrame(master=self.frame, width=400, height=400,corner_radius=0)
-        # table.grid_rowconfigure(0, weight=1)
-        # table.grid_columnconfigure((0, 1, 2), weight=1)
+        table = ctk.CTkFrame(master=self.frame, width=400, height=400,corner_radius=0, fg_color="black", border_color="black", border_width=20)
         table.pack(padx=10)
 
         self.botones = [[None for i in range(9)] for i in range(9)]
@@ -49,10 +52,13 @@ class App(ctk.CTk):
 
                 cell_button = ctk.CTkButton(master=macro_cell,
                                        textvariable=self.valores[x][y],   #cada botón tendrá una posición de memoria con su StringVar correspondiente 
+                                       text_color="black",
                                        width=40,
                                        height=40,
                                        command= lambda pos=(x,y): self.__Prueba(pos),
-                                       fg_color="#C2DAAA",
+                                       fg_color="white",
+                                       hover_color="#98B9E2",
+                                       font=("Arial",16),
                                        border_color="gray",
                                        border_width=1,
                                        corner_radius=0)
@@ -71,6 +77,7 @@ class App(ctk.CTk):
             input_button = ctk.CTkButton(
                 master=self.keypad,
                 text=str(i+1),
+                font=("Arial",16),
                 width=40,
                 height=40,
                 border_color="black",
@@ -83,6 +90,7 @@ class App(ctk.CTk):
         input_button.grid(row=3,column=1,padx=1,pady=1)
 
     def load_game(self):
+        self.start_time = time()
         self.match.load_random_from_file("puzzles0_kaggle")
         
         for i in range(9):
@@ -97,30 +105,49 @@ class App(ctk.CTk):
     def modify_cell_value(self,x,y,value) -> None:
         self.valores[x][y].set(value)
         
-
     def __Prueba(self,position):
         for i in range(9):
-            self.botones[self.selectedCell[0]][i].configure(fg_color="#C2DAAA")
-            self.botones[i][self.selectedCell[1]].configure(fg_color="#C2DAAA")
+            self.botones[self.selectedCell[0]][i].configure(fg_color="white")
+            self.botones[i][self.selectedCell[1]].configure(fg_color="white")
 
         for i in range(9):
-            self.botones[position[0]][i].configure(fg_color="red")
-            self.botones[i][position[1]].configure(fg_color="red")
+            self.botones[position[0]][i].configure(fg_color="#98B9E2")
+            self.botones[i][position[1]].configure(fg_color="#98B9E2")
 
-        self.botones[position[0]][position[1]].configure(fg_color="red")
+        self.botones[position[0]][position[1]].configure(fg_color="#8DB0DB")
 
         self.selectedCell = (position[0],position[1])
     
     def __input(self,number):
         if self.match.play(self.selectedCell[1],self.selectedCell[0],number):
             if number == "0":
-                self.valores[self.selectedCell[0]][self.selectedCell[1]].set(" ")
+                self.valores[self.selectedCell[0]][self.selectedCell[1]].set("")
             else:
                 self.valores[self.selectedCell[0]][self.selectedCell[1]].set(number)
 
+    def crono_update(self):
+        self.match_time = time()-self.start_time
+        hours = str(int(self.match_time // 3600))
+        if len(hours)==1:
+            hours = "0"+hours
 
+        minutes = str(int((self.match_time // 60)%60))
+        if len(minutes)==1:
+            minutes = "0"+minutes
+
+        seconds = str(int(self.match_time%60))
+        if len(seconds)==1:
+            seconds = "0"+seconds
+
+        tiempo = f'{hours}:{minutes}:{seconds}'
+
+        self.cronometro.configure(text=tiempo)
+        
+        self.after(1000,self.crono_update)
 
 graficos = App()
 graficos.load_game()
+
+graficos.crono_update()
 graficos.mainloop()
 
