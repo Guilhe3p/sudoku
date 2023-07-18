@@ -1,4 +1,5 @@
 from numpy import zeros, array, random, count_nonzero, nonzero, uint8
+import temporal_path
 
 def verify_list(lis):
         for i in range(1,10):
@@ -17,6 +18,12 @@ class Game():
         self.matrix = zeros((9,9), uint8) #array de 0s con tipo de dato int 8 bits (0-255)
         self.__inmmutables = []
         self.state = True
+        try:
+            self.puzzles_temp_route = temporal_path.resource_path("puzzles0_kaggle")
+        except FileNotFoundError:
+            print("Puzzles no encontrados")
+
+        self.game_data_temp = temporal_path.resource_path("game_data")
 
     def __str__(self) -> str:
         return (str(self.matrix)+"\n"+str(self.state))
@@ -24,23 +31,8 @@ class Game():
     def get_inmmutables(self) -> array:
         return self.__inmmutables
 
-    def load_special_1(self) -> None:
-        self.matrix = array([[i%9 for i in range(j,9+j)] for j in range(9)])
-    def load_random(self,magnitude) -> None:
-        cont = 0
-        while cont < magnitude:
-            #post = np.random.randint(0,9,3,np.uint8)
-            pos_value = (random.randint(0,9),random.randint(0,9),random.randint(1,10))
-            if self.matrix[pos_value[0]][pos_value[1]]==0:
-                self.matrix[pos_value[0]][pos_value[1]] = pos_value[2]
-                if self.verify_game():
-                    cont += 1
-                else:
-                    self.delete(pos_value[0],pos_value[1])
-        
-        self.immutables = self.matrix.nonzero()
     def load_random_from_file(self,file_name) -> None:
-        file = open(file_name,"r")  #abro archivo en modo lectura
+        file = open(self.puzzles_temp_route,"r")  #abro archivo en modo lectura
         lines = file.readlines() #cargo una lista con sus renglones
         line = lines[random.randint(0,len(lines))]   #elijo un reglón al azar
         mat = []    #creo una lista a cargar con los valores del renglón
@@ -53,10 +45,12 @@ class Game():
 
         self.matrix = array(mat).reshape(9,9)    #le doy forma de matriz a mat
         self.__inmmutables = nonzero(self.matrix)    #inmmutables tendrá las posiciones con los numeros cargados y que no podrán ser modificados
+    
     def load_from_game_data(self)->None:    #carga una partida dado un string con datos
         mat = []
         inmut = []
-        game_data_file = open("game_data","r")
+
+        game_data_file = open(self.game_data_temp,"r")
         inmmutable_line = game_data_file.readline()
         mutable_line = game_data_file.readline()
 
@@ -93,7 +87,7 @@ class Game():
                 return True
         return False
     
-    def play(self,x,y,value) -> bool:    #temporal return str
+    def play(self,x,y,value) -> bool:
         if self.invalid_position(x,y):
             return False
     

@@ -2,10 +2,19 @@ from customtkinter import CTk,set_appearance_mode,set_default_color_theme,CTkFra
 from time import time
 from tkinter import StringVar
 import game_logic as lg
+import temporal_path
 
 class App(CTk):
     def __init__(self) -> None:
         super().__init__()
+        #busco la ruta temporal de nuestros archivos
+        try:
+            self.game_data_temp_route = temporal_path.resource_path("game_data")
+        except FileNotFoundError:
+            open(temporal_path.resource_path(""),"w")
+            self.game_data_temp_route = temporal_path.resource_path("game_data")
+            
+
         #establezco nuestra partida lógica
         self.match = lg.Game()
 
@@ -64,7 +73,7 @@ class App(CTk):
                                        text_color="black",
                                        width=40,
                                        height=40,
-                                       command= lambda pos=(x,y): self.__Prueba(pos),
+                                       command= lambda pos=(x,y): self.__pointer(pos),
                                        fg_color="white",
                                        hover_color="#98B9E2",
                                        font=("Arial",16),
@@ -101,7 +110,8 @@ class App(CTk):
     def new_game(self) -> None:
         self.start_time = time()
         self.match.load_random_from_file("puzzles0_kaggle")
-        game_data_file = open("game_data","w")
+        game_data_file = open(self.game_data_temp_route,"w")
+
         line:str = ""
         
         for i in range(9):
@@ -115,12 +125,10 @@ class App(CTk):
         self.load_game()
 
     def load_game(self) -> None:
-        #abro game_data y guardo el contenido de sus 3 lineas
-        game_data_file = open("game_data","r")
-        game_data_lines = game_data_file.readlines()
-        
-        #establezco el nuevo tiempo de inicio para el cronómetro
-        self.start_time = time() - int(game_data_lines[2])
+        #abro game_data y establezco el nuevo tiempo de inicio para el cronómetro
+        game_data_file = open(self.game_data_temp_route,"r")
+        game_data_file.seek(164)
+        self.start_time = time() - int(game_data_file.readline())
 
         #cargo la partida lógica
         self.match.load_from_game_data()
@@ -142,7 +150,7 @@ class App(CTk):
         #fin load_game()
 
     def save_current_game_data(self):
-        game_data_file = open("game_data","r+")
+        game_data_file = open(self.game_data_temp_route,"r+")
         game_data_file.seek(82)
         
         for i in range(9):
@@ -154,7 +162,7 @@ class App(CTk):
     def modify_cell_value(self,x,y,value) -> None:
         self.valores[x][y].set(value)
         
-    def __Prueba(self,position):
+    def __pointer(self,position):
         for i in range(9):
             self.botones[self.selectedCell[0]][i].configure(fg_color="white")
             self.botones[i][self.selectedCell[1]].configure(fg_color="white")
@@ -198,7 +206,8 @@ class App(CTk):
 
         self.cronometro.configure(text=tiempo)
 
-        with open("game_data","r+") as game_data_file:
+        with open(self.game_data_temp_route,"r+") as game_data_file:
+            print("sobreescribiendo el tiempo actual:",self.match_time)
             game_data_file.seek(164)
             game_data_file.write(str(self.match_time))
         
