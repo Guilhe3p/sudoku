@@ -93,7 +93,7 @@ class Game():
                 return True
         return False
     
-    def play(self,x,y,value) -> str:    #temporal return str
+    def play(self,x,y,value) -> bool:    #temporal return str
         if self.invalid_position(x,y):
             return False
     
