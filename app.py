@@ -21,18 +21,25 @@ class App(CTk):
         self.frame = CTkFrame(master=self, fg_color="white")
         self.frame.pack(pady=10,padx=10,fill="both",expand=True)
 
-        #reloj
-        self.cronometro = CTkLabel(master=self.frame, text="00:00:00", width=100, height=30,corner_radius=0, fg_color="white")
-        self.cronometro.pack(padx=10)
+        #modulo superior
+        top_module = CTkFrame(master=self.frame,fg_color="white")
+        top_module.pack(pady=20)
+            #botón nueva partida
+        new_game_button = CTkButton(master=top_module,text="Nueva Partida",command=lambda: self.new_game())
+        new_game_button.grid(row=0,column=0,padx=20)
+
+            #reloj
+        self.cronometro = CTkLabel(master=top_module, text="00:00:00", width=100, height=30,corner_radius=0, fg_color="white")
+        self.cronometro.grid(row=0,column=1,padx=20)
 
         #modulo tabla
         table = CTkFrame(master=self.frame, width=400, height=400,corner_radius=0, fg_color="black", border_color="black", border_width=20)
         table.pack(padx=10)
 
-        #tabla con los objetos botones y sus StringVar asociadas
+            #matrices con los objetos botones y sus StringVar asociadas
         self.botones = [[None for i in range(9)] for i in range(9)]
         self.valores = [[None for i in range(9)] for i in range(9)]
-        #modulos macro-celdas
+            #modulos macro-celdas
         for i in range(9):
             macro_cell = CTkFrame(master=table,
                                       fg_color="blue",
@@ -70,7 +77,7 @@ class App(CTk):
 
                 self.selectedCell = (0,0) #establezco a la posicion 0,0 como la seleccionada para evitar errores
 
-        #creo la botonera
+            #creo la botonera
         self.keypad = CTkFrame(master=self.frame)
         self.keypad.pack(pady=10)
 
@@ -90,10 +97,11 @@ class App(CTk):
         input_button = CTkButton(master=self.keypad,text="",width=40,height=40,border_color="black",command = lambda: self.__input("0"),border_width=2,corner_radius=0)
         input_button.grid(row=3,column=1,padx=1,pady=1)
 
-    def load_game(self):
+    def new_game(self):
         self.start_time = time()
         self.match.load_random_from_file("puzzles0_kaggle")
         game_data_file = open("game_data","w")
+        line:str = ""
         
         for i in range(9):
             for j in range(9):
@@ -104,15 +112,35 @@ class App(CTk):
                     self.modify_cell_value(i,j,self.match.matrix[j][i])
                     self.botones[i][j].configure(text_color="gray")
 
-                game_data_file.write(str(self.match.matrix[i][j]))
+                line += str(self.match.matrix[i][j])
 
-        game_data_file.write("\n000000000000000000000000000000000000000000000000000000000000000000000000000000000\n0")
+        game_data_file.write(line+"\n"+line+"\n")
 
         game_data_file.close()
 
         print(self.match)
 
-    def save_game(self):
+    def load_game(self):
+        game_data_file = open("game_data","r")
+        game_data_lines = game_data_file.readlines()
+        
+        self.start_time = time() - int(game_data_lines[2])
+
+        self.match.load_from_game_data()
+        print(self.match)
+
+        for i in range(9):
+            for j in range(9):
+
+                if self.match.matrix[j][i] == 0:
+                    self.modify_cell_value(i,j,"")
+                else:
+                    self.modify_cell_value(i,j,self.match.matrix[j][i])
+                    if self.match.invalid_position(j,i):
+                        self.botones[i][j].configure(font=("Arial",16,"bold"))
+        game_data_file.close()
+
+    def save_current_game_data(self):
         game_data_file = open("game_data","r+")
         game_data_file.seek(82)
         
@@ -145,7 +173,7 @@ class App(CTk):
             else:
                 self.valores[self.selectedCell[0]][self.selectedCell[1]].set(number)
             
-            self.save_game()
+            self.save_current_game_data()
 
     def crono_update(self) -> None:
         self.match_time = int(time()-self.start_time)

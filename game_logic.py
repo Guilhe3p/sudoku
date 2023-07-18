@@ -53,13 +53,19 @@ class Game():
 
         self.matrix = array(mat).reshape(9,9)    #le doy forma de matriz a mat
         self.__inmmutables = nonzero(self.matrix)    #inmmutables tendrá las posiciones con los numeros cargados y que no podrán ser modificados
-    def load_given(self,data:str)->bool:    #carga una partida dado un string con datos
+    def load_from_game_data(self)->None:    #carga una partida dado un string con datos
         mat = []
-        for i in data:
-            mat.append(int(i))
+        inmut = []
+        game_data_file = open("game_data","r")
+        inmmutable_line = game_data_file.readline()
+        mutable_line = game_data_file.readline()
+
+        for i in range(81):
+            mat.append(int(mutable_line[i]))
+            inmut.append(int(inmmutable_line[i]))
 
         self.matrix = array(mat).reshape(9,9) 
-        self.__inmmutables = nonzero(self.matrix)   
+        self.__inmmutables = nonzero(array(inmut).reshape(9,9))   
 
     def __verify_game(self) -> bool:
         for c in range(9):
@@ -81,14 +87,14 @@ class Game():
         self.state = True        
         return True
 
-    def __invalid_position(self,x,y) -> bool:
+    def invalid_position(self,x,y) -> bool:
         for i in range(len(self.__inmmutables[0])): #reviso si el par (x,y) existe en en __inmmutables
             if (x,y) == (self.__inmmutables[0][i],self.__inmmutables[1][i]):
                 return True
         return False
     
     def play(self,x,y,value) -> str:    #temporal return str
-        if self.__invalid_position(x,y):
+        if self.invalid_position(x,y):
             return False
     
         self.matrix[x][y] = value
