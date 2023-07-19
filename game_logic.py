@@ -1,5 +1,5 @@
 from numpy import zeros, array, random, count_nonzero, nonzero, uint8
-import temporal_path
+import file_management
 
 def verify_list(lis):
         for i in range(1,10):
@@ -18,12 +18,13 @@ class Game():
         self.matrix = zeros((9,9), uint8) #array de 0s con tipo de dato int 8 bits (0-255)
         self.__inmmutables = []
         self.state = True
+        
         try:
-            self.puzzles_temp_route = temporal_path.resource_path("puzzles0_kaggle")
+            self.puzzles_temp_route = file_management.resource_path("puzzles0_kaggle")
         except FileNotFoundError:
             print("Puzzles no encontrados")
 
-        self.game_data_temp = temporal_path.resource_path("game_data")
+        self.game_data_path = file_management.set_game_data_directory()
 
     def __str__(self) -> str:
         return (str(self.matrix)+"\n"+str(self.state))
@@ -31,7 +32,7 @@ class Game():
     def get_inmmutables(self) -> array:
         return self.__inmmutables
 
-    def load_random_from_file(self,file_name) -> None:
+    def load_random_from_file(self) -> None:
         file = open(self.puzzles_temp_route,"r")  #abro archivo en modo lectura
         lines = file.readlines() #cargo una lista con sus renglones
         line = lines[random.randint(0,len(lines))]   #elijo un reglón al azar
@@ -50,7 +51,7 @@ class Game():
         mat = []
         inmut = []
 
-        game_data_file = open(self.game_data_temp,"r")
+        game_data_file = open(self.game_data_path,"r")
         inmmutable_line = game_data_file.readline()
         mutable_line = game_data_file.readline()
 

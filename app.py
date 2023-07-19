@@ -2,19 +2,14 @@ from customtkinter import CTk,set_appearance_mode,set_default_color_theme,CTkFra
 from time import time
 from tkinter import StringVar
 import game_logic as lg
-import temporal_path
+import file_management
 
 class App(CTk):
     def __init__(self) -> None:
         super().__init__()
-        #busco la ruta temporal de nuestros archivos
-        try:
-            self.game_data_temp_route = temporal_path.resource_path("game_data")
-        except FileNotFoundError:
-            open(temporal_path.resource_path(""),"w")
-            self.game_data_temp_route = temporal_path.resource_path("game_data")
+        #busco la ruta de nuestros archivos
+        self.game_data_path = file_management.set_game_data_directory()
             
-
         #establezco nuestra partida lógica
         self.match = lg.Game()
 
@@ -109,8 +104,8 @@ class App(CTk):
 
     def new_game(self) -> None:
         self.start_time = time()
-        self.match.load_random_from_file("puzzles0_kaggle")
-        game_data_file = open(self.game_data_temp_route,"w")
+        self.match.load_random_from_file()
+        game_data_file = open(self.game_data_path,"w")
 
         line:str = ""
         
@@ -126,7 +121,7 @@ class App(CTk):
 
     def load_game(self) -> None:
         #abro game_data y establezco el nuevo tiempo de inicio para el cronómetro
-        game_data_file = open(self.game_data_temp_route,"r")
+        game_data_file = open(self.game_data_path,"r")
         game_data_file.seek(164)
         self.start_time = time() - int(game_data_file.readline())
 
@@ -150,7 +145,7 @@ class App(CTk):
         #fin load_game()
 
     def save_current_game_data(self):
-        game_data_file = open(self.game_data_temp_route,"r+")
+        game_data_file = open(self.game_data_path,"r+")
         game_data_file.seek(82)
         
         for i in range(9):
@@ -206,8 +201,7 @@ class App(CTk):
 
         self.cronometro.configure(text=tiempo)
 
-        with open(self.game_data_temp_route,"r+") as game_data_file:
-            print("sobreescribiendo el tiempo actual:",self.match_time)
+        with open(self.game_data_path,"r+") as game_data_file:
             game_data_file.seek(164)
             game_data_file.write(str(self.match_time))
         
